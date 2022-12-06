@@ -21,8 +21,8 @@ class Game:
     
     def rodar(self):
         #loop do jogo
-        self.jogando = True
-        while self.jogando:
+        running = True
+        while running:
             self.relogio.tick(constantes.FPS)
             self.eventos()
             self.atualizar_sprites()
