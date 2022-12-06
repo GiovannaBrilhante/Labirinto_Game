@@ -1,8 +1,8 @@
 # Simple pygame program
 # Import and initialize the pygame library
 import pygame
-
 import random
+import os
 
 from pygame.locals import (
     RLEACCEL,
@@ -20,6 +20,10 @@ pygame.init()
 # Define constants for the screen width and height
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
+
+SPRITESHEET_LOGO = 'abertura.png'
+
+
 
 # Create the screen object
 # The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
@@ -86,7 +90,14 @@ class Parede(pygame.sprite.Sprite):
         self.rect.move_ip(-self.speed, 0)
         if self.rect.right < 0:
            self.kill()
-
+     
+     
+    def carregar_arquivos(self):
+         diretorio_imagens= os.path.join(os.getcwd(),'assets')
+         self.spritesheet = os.path.join(diretorio_imagens,SPRITESHEET_LOGO)
+         self.spritesheet = pygame.image.load(self.spritesheet).convert()
+         
+          
 azul = (0, 0, 255)
 vermelho = (255, 0, 0)
 verde = (0, 255, 0)
