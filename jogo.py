@@ -1,8 +1,8 @@
 # Simple pygame program
 # Import and initialize the pygame library
 import pygame 
-# Biblioteca para pegar imagem
-import os
+
+
 import gpiozero
 import time
 
@@ -21,30 +21,34 @@ from pygame.locals import (
 pygame.init()
 
 #Definindo as portas do led
+
 led = gpiozero.LED(19)
 led2 = gpiozero.LED(28)
 # Define constants for the screen width and height
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
-SPRITESHEET_LOGO = 'abertura.png'
 
-gameOver = False
-telaInicial = True
-ganhou = False
+
+gameOver = False # variavel pra tela de gamer Over 
+telaInicial = True #variavel pra tela de Abertura
+ganhou = False   #Variavel pra mostrar se ganhou 
 timer = 0
 tempo_segundo = 0
-font = pygame.font.Font("freesansbold.ttf", 20)
-text = font.render("Tempo: ", True, (255, 255, 255), (0, 0, 0))
+font = pygame.font.Font("freesansbold.ttf", 20) #defina qual é a fonte e o tamanho
+text = font.render("Tempo: ", True, (255, 255, 255), (0, 0, 0)) # defina qual mensagem e a cor do text
 pos_texto = text.get_rect()
-pos_texto.center = (45, 25)
+pos_texto.center = (45, 25) # DEFINIMOS A POSICAO ONDE O TEXTO CAI FICAR
 
 
 # Create the screen object
 # The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
+
+#TAMANHO DA NOSSA TELA 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 
+# Serve pra pegar as mensagens e mostrar na tela 
 def texto(msg, cor):
     fonte = font.render(msg, True, cor)
     screen.blit(fonte, [SCREEN_WIDTH/8, SCREEN_HEIGHT/2])
@@ -68,6 +72,8 @@ def texto2(msg, cor):
 # The surface drawn on the screen is now an attribute of 'player'
 
 
+#Essa é a classe do Player(Jogador), onde definimos a imagem dele, na onde ele vai começar no 
+# jogo e a sua velocidade
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super(Player, self).__init__()
@@ -78,7 +84,8 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = SCREEN_HEIGHT / 2
         self.speed = 3
 
-        # Move the sprite based on user keypresses
+   # os movimentos que o player pode fazer 
+      
     def update(self, pressed_keys):
         if pressed_keys[K_UP]:
             self.rect.move_ip(0, -self.speed)
@@ -99,28 +106,20 @@ class Player(pygame.sprite.Sprite):
         if self.rect.bottom >= SCREEN_HEIGHT:
             self.rect.bottom = SCREEN_HEIGHT
 
-
+#aqui é uma variavel recebendo a classe Player
 player = Player()
 
-#enemies = pygame.sprite.Group()
+
+#Variavel recebendo o grupo de sprites
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 
-# Define the enemy object by extending pygame.sprite.Sprite
-# The surface you draw on the screen is now an attribute of 'enemy'
-
-class Inimigo(pygame.sprite.Sprite):
-    def __init__(self, config, cor):
-        super(Inimigo, self).__init__()
-        print("Parede X ", config[0], "Y ", config[1],
-              "Larg ", config[2], "Alt ", config[3])
-        print("Parede: ", (config[2], config[3]), " Cor:", cor)
-        self.surf = pygame.Surface((config[2], config[3]))
-        self.surf.fill(cor)
-        self.rect = self.surf.get_rect()
-        self.rect.x = config[0]
-        self.rect.y = config[1]
   
+
+# Aqui é a classe Parede,
+# onde chama as configurações da parede.
+#E o da  vitoria(QUE CASO O JOGADOR COLIDE)-> O JOGADOR GANHE
+
 
 class Parede(pygame.sprite.Sprite):
     def __init__(self, config, cor,vitoria):
@@ -142,16 +141,17 @@ class Parede(pygame.sprite.Sprite):
         if self.rect.right < 0:
             self.kill()
 
-    def carregar_arquivos(self):
-        diretorio_imagens = os.path.join(os.getcwd(), 'assets')
-        self.spritesheet = os.path.join(diretorio_imagens, SPRITESHEET_LOGO)
-        self.spritesheet = pygame.image.load(self.spritesheet).convert()
+  
 
-
+# aqui as variaveis que definimos de suas cor. 
 azul = (0, 0, 255)
 vermelho = (255, 0, 0)
 verde = (0, 255, 0)
 rosa = (235, 0, 251)
+
+# Esse parede_conf  serve para montar o nosso grupo de paredes, que são definidos 
+# a posicao X, posicao Y , largura e altura e se ele é falso ou true
+
 paredes_conf = [  # sreem, cor(rgb), [rect.x,rect.y,larg, altura]
     # pygame.draw.rect(screen, (0, 0, 255), [400, 400, 200, 200])
     [[400, 200, 200, 200], azul, False],
@@ -167,10 +167,10 @@ paredes_conf = [  # sreem, cor(rgb), [rect.x,rect.y,larg, altura]
     [[000, 400, 200, 200],  rosa,False],
     [[000, 000, 200, 200],  rosa, False]
 ]
-enemies = [
-    [700, 200, 100, 100], (0, 0, 0)
-    ],
+# colocamos se ele é False ou true -> Pra quando o jogador colidir numa  parede, caso ela bate numa parede que é True, quer dizer que ele chegou no destino e ganhou
+# caso seja False, ele colidiu numa parede normal e ele perde o jogo
 
+# variavel os grupo de sprites
 vitorias = pygame.sprite.Group()
 paredes = pygame.sprite.Group()
 
@@ -179,8 +179,10 @@ for parede_conf in paredes_conf:
     
     print("ParedeConf1: ", parede_conf[0], "ParedeCor: ", parede_conf[1])
     parede = Parede(parede_conf[0], parede_conf[1], parede_conf[2])
-    #enemies = Inimigo(enemies[],enemies[1])
     
+    
+    # nessa verificação, ele verifica que se a parede que colidiu é True quer dizer 
+    # que ele ganhou, entao na variavel vitoria ele adiciona parede, caso entre no  False, ele colidiu na parede e nao ganhou
     if parede_conf[2] == True:
         vitorias.add(parede)
     else:
@@ -188,48 +190,74 @@ for parede_conf in paredes_conf:
  
 
 FPS = 40
+#Variavel que pega o tempo
 clock = pygame.time.Clock()
+#Variavel pra rodar o jogo
 running = True
+# o tempo do jogo
 pygame.time.delay(50)
 
+#Pra rodar o jogo
 while running:
-
+# caso o jogador ganhe
     while ganhou:
+        #Mostra o Led acendendo 
         led.on()
+        #o tempo que ele fica acesso
         time.sleep(1)
+        # e apaga o led e por quando tempo fica apagado
         led.off()
         time.sleep(1)
+        #E mostra mensagem que ele ganhou
         texto2(
             "O Sérgio foi levado até a portaria, você ganhou nota 10", (0, 0, 0))
+        
+        # pra quando ele sempre ganhar ir nessa tela 
         pygame.display.update()
+        
         for event in pygame.event.get():
             if event.type == QUIT:
+                # caso ele saia, o jogo sai e nao mostra que ele ganhou
                 running = False
                 ganhou = False
             if event.type == pygame.KEYDOWN:
+                #opcao de apertar no TECLA B  pra rodar o jogo de novo -> QUER DIZER QUE ELE NAO GANHOU
                 if event.key == pygame.K_b:
                     player.rect.x = 0
                     player.rect.y = SCREEN_HEIGHT / 2
+                
                     running = True
                     ganhou= False
                     all_sprites.add(player)
                     timer = 0
+                    #OPCAO BOTAO N pra ele sair do jogo
                 if event.key == pygame.K_n:
+                    
                     running = False
                     ganhou = False
+                    
+      # WHILE-> pra rodar a tela de gamer over 
+      # caso ele perca, acende o led2('LED VERMELHO)
+      # e por quando ele fica acesso e depois apaga e por quando tempo ele apaga              
     while gameOver:
         led2.on()
         time.sleep(1)
         led2.off()
         time.sleep(1)
+        #mensagem pra mostrar caso ele perde  
         texto(
             "Game Over, para jogar novamente aperte a tecla B, ou N para sair", (0, 0, 0))
+      #pra atualizar toda vez que ele perder entra nessa tela
         pygame.display.update()
+      
+      
         for event in pygame.event.get():
             if event.type == QUIT:
+                # caso ele saia do jogo, o jogo para e nao mostra a tela de game over 
                 running = False
                 gameOver = False
             if event.type == pygame.KEYDOWN:
+                # TECLA B -> pra ele reiniciar o jogo 
                 if event.key == pygame.K_b:
                     player.rect.x = 0
                     player.rect.y = SCREEN_HEIGHT / 2
@@ -237,11 +265,12 @@ while running:
                     gameOver = False
                     all_sprites.add(player)
                     timer = 0
+                    # TECLA N -> opcao pra ele sair do jogo
                 if event.key == pygame.K_n:
                     running = False
                     gameOver = False
 
- # Did the user click the window close button?
+ # PRA QUANDO ELE FECHAR A TELA O JOGO NAO COMEÇAR
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -250,6 +279,8 @@ while running:
             if event.type == K_ESCAPE:
                 running = False
 
+# TELA DE ABERTURA -> ONDE MOSTRA OS TEXTOS E A COR E TODA QUE VEZ QUE ENTRAR NO JOGO MOSTRA A 
+# TELA DE ABERTURA 
     while telaInicial:
         screen.fill((0, 255, 255))
         texto1("Pressione I para levar o Sérgio até a portaria do Cotuca(a caixa preta)", (255, 0, 0))
@@ -262,6 +293,7 @@ while running:
                 running = False
                 telaInicial = False
             if event.type == pygame.KEYDOWN:
+                #TECLA I -> PRA COMEÇAR O JOGO
                 if event.key == pygame.K_i:
                     running = True
                     telaInicial = False
@@ -273,17 +305,15 @@ while running:
     # Update the player sprite based on user keypresses
     player.update(pressed_keys)
 
-    # enemies.update()
+   
  # Fill the background with white
     screen.fill((255, 255, 255))
-    # parede = Parede(paredes_conf, paredes_conf[4])
-    # screen.blit(parede.surf, parede.rect)
-    # for parede_conf in paredes_conf:
-    #   parede = Parede(parede_conf[0], parede_conf[1])
-
+    
+  #UM IF PRA VERIFICAO DE TEMPO
     if (timer < 20):
         timer += 1
     else:
+        # AQUI MOSTRA O TEMPO QUE O JOGADOR ESTA JOGANDO
         tempo_segundo += 1
         text = font.render("Tempo: " + str(tempo_segundo),
                            True, (255, 255, 255), (0, 0, 0))
@@ -297,25 +327,22 @@ while running:
         screen.blit(parede_vitoria.surf, parede_vitoria.rect)
 
 
-    #for enemies in enemies:
-     #   screen.blit(enemies.surf, enemies.rect)
+     
+     # SE COLIDIR COM A PAREDE (PORTARIA), MOSTRA QUE ELE GANHOU
     if pygame.sprite.spritecollideany(player, vitorias):
         print(paredes)
         player.kill()
         ganhou = True
 
+# SE COLIDIR COM  A PAREDE -> QUER DIZER QUE ELE MORREU E MOSTRA A TELA DE GAMER OVER
     if pygame.sprite.spritecollideany(player, paredes):
         print(paredes)
         player.kill()
         gameOver = True
 
-    #if pygame.sprite.spritecollideany(player, enemies):
-     #   ganhou = True
-
-    if player.rect.x == 700 and player.rect.y == 200:
-        text = font.render("Ganhou: " + str(tempo_segundo),
-                           True, (255, 255, 255), (0, 0, 0))
-
+    
+     
+  # AQUI SERIA VERSAO ANTES DAS  NOSSAS PAREDES.
     '''
     pygame.draw.rect(screen, (0, 0, 255), [400, 400, 200, 200])
     # verde
@@ -333,6 +360,7 @@ while running:
     pygame.draw.rect(screen, (235, 0, 251), [000, 400, 200, 200])
     pygame.draw.rect(screen, (235, 0, 251), [000, 000, 200, 200])
 '''
+    # MOSTRA NA TELA AS MENSAGENS, O PLAYER 
     screen.blit(text, pos_texto)
     screen.blit(player.surf, player.rect)
     for entity in all_sprites:
@@ -342,5 +370,5 @@ while running:
     pygame.display.flip()
     clock.tick(FPS)
 
-
+#FECHA O JOGO
 pygame.quit()
